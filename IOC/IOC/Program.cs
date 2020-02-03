@@ -15,39 +15,60 @@ namespace IOC
 
             string connectionString = config.GetConnectionString("AdventureWorks2017");
            
-            bool continueExecution = true;
-            do
-            {
-                Console.Write("Enter First Name:");
-                var firstName = Console.ReadLine();
-
-                Console.Write("Enter Last Name:");
-                var lastName = Console.ReadLine();
-
-                Console.Write("Do you want to save it? Y/N: ");
-
-                var wantToSave = Console.ReadLine();
-
-                if (wantToSave.ToUpper() == "Y")
-                    SaveToDB(firstName, lastName, connectionString);
-
-                Console.Write("Do you want to exit? Y/N: ");
-
-                var wantToExit = Console.ReadLine();
-
-                if (wantToExit.ToUpper() == "Y")
-                    continueExecution = false;
-
-            } while (continueExecution);
+           
         }
 
-        private static void SaveToDB(string firstName, string lastName,string connstr)
+        public class CustomerBusinessLogic
         {
-            using (SqlConnection conn = new SqlConnection(connstr))
+            ICustomerDataAccess _dataAccess;
+            public CustomerBusinessLogic()
             {
-                conn.Open();
+                //邏輯上這裡的_dataAccess不再依賴實體的class，而是由抽象的介面代替
+                //DataAccess and CustomerBusinessLogic is now loosely coupled
+                _dataAccess = DataAccessFactory.GetDataAccessObj();
+            }
 
+            public string GetCustomerName(int id)
+            {
+                return _dataAccess.GetCustomerName(id);
             }
         }
+
+        public interface ICustomerDataAccess
+        {
+            string GetCustomerName(int id);
+        }
+
+        //產生任何能存取到data的模組
+        public class DataAccessFactory
+        {
+            public static ICustomerDataAccess GetDataAccessObj()
+            {
+                return new DataAccess();
+            }
+        }
+
+        public class DataAccess: ICustomerDataAccess
+        {
+            public DataAccess()
+            {
+            }
+
+            public string GetCustomerName(int id)
+            {
+                return "Dummy Customer Name"; // get it from DB in real app
+            }
+        }
+
+        public class CarDataAccess {
+
+            public static string GetCarInfos()
+            {
+
+                return null;
+            }
+        }
+
+
     }
 }
